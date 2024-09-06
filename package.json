@@ -17,6 +17,7 @@
     "@emotion/styled": "^11.11.0",
     "@shopify/app": "3.47.5",
     "@shopify/cli": "3.47.5",
+    "axios": "^1.7.7",
     "framer-motion": "^10.13.0",
     "mongoose": "^8.0.2",
     "react": "^18.2.0",

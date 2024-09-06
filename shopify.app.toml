@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://hollow-renewal-peoples-intro.trycloudflare.com"
+application_url = "https://linked-sally-discharge-naval.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://hollow-renewal-peoples-intro.trycloudflare.com/auth/callback",
-  "https://hollow-renewal-peoples-intro.trycloudflare.com/auth/shopify/callback",
-  "https://hollow-renewal-peoples-intro.trycloudflare.com/api/auth/callback"
+  "https://linked-sally-discharge-naval.trycloudflare.com/auth/callback",
+  "https://linked-sally-discharge-naval.trycloudflare.com/auth/shopify/callback",
+  "https://linked-sally-discharge-naval.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]

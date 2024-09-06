@@ -11,42 +11,81 @@ import {
 } from "@shopify/polaris";
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
+const handleSave = async () => {
+  if (title && price && selectedProductsCount > 0) {
+    try {
+      const response = await fetch("/api/save-bundle", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title,
+          price,
+          selectedProducts,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.message); // Show success message
+      } else {
+        alert("Failed to save the bundle. Please try again.");
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred. Please try again.");
+    }
+  } else {
+    alert("Please fill out all fields and select products.");
+  }
+};
 
 export default function BundlePage() {
-  const [title, setTitle] = useState('');  // State for Title field
-  const [price, setPrice] = useState('');  // State for Price field
-  const [selectedProductsCount, setSelectedProductsCount] = useState(0);  // Track selected products count
-  const [selectedProducts, setSelectedProducts] = useState([]);  // Store selected products
+  const [title, setTitle] = useState(""); 
+  const [price, setPrice] = useState(""); 
+  const [selectedProductsCount, setSelectedProductsCount] = useState(0); // Hack u :>
+  const [selectedProducts, setSelectedProducts] = useState([]); // Delete system32 from ur computer
 
-  // Handler for the title field
   const handleTitleChange = (value) => setTitle(value);
 
-  // Handler for the price field
   const handlePriceChange = (value) => setPrice(value);
 
-  // Handler for product selection count update from ProductSelectButton
   const handleProductSelect = (count, products) => {
     setSelectedProductsCount(count);
     setSelectedProducts(products);
   };
 
-  // Function to handle saving the bundle
-  const handleSave = () => {
+  const handleSave = async () => {
     if (title && price && selectedProductsCount > 0) {
-      // Replace this console log with an API call to save the bundle
-      console.log("Bundle saved with details:", {
-        title,
-        price,
-        selectedProducts,
-      });
-
-      // Show success notification or navigate away (if needed)
-      alert("Bundle saved successfully!");
+      try {
+        const response = await fetch('/api/save-bundle', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            title,
+            price,
+            selectedProducts,
+          }),
+        });
+  
+        if (response.ok) {
+          const data = await response.json();
+          alert(data.message); // Show success message
+        } else {
+          alert('Failed to save the bundle. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+      }
     } else {
-      alert("Please fill out all fields and select products.");
+      alert('Please fill out all fields and select products.');
     }
   };
-
+  
   return (
     <Page title="Bundles">
       <Layout>
@@ -55,20 +94,22 @@ export default function BundlePage() {
           <Card sectioned>
             <TextField
               label="Title"
-              value={title}                       // Controlled value for Title
-              onChange={handleTitleChange}        // onChange handler for Title
+              value={title} // Controlled value for Title
+              onChange={handleTitleChange} // onChange handler for Title
               placeholder="Enter bundle title"
             />
             <TextField
               label="Price"
-              value={price}                       // Controlled value for Price
-              onChange={handlePriceChange}        // onChange handler for Price
+              value={price} // Controlled value for Price
+              onChange={handlePriceChange} // onChange handler for Price
               placeholder="Enter bundle Price"
               type="number"
             />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <ProductSelectButton
-                onProductSelect={(count, products) => handleProductSelect(count, products)}
+                onProductSelect={(count, products) =>
+                  handleProductSelect(count, products)
+                }
               />
             </div>
           </Card>
@@ -79,7 +120,8 @@ export default function BundlePage() {
           <Card title="Components">
             <Card.Section>
               <TextStyle variation="subdued">
-                Bundles can include up to 30 different products. Limits for bundle options and variants are the same as other products.
+                Bundles can include up to 30 different products. Limits for
+                bundle options and variants are the same as other products.
               </TextStyle>
               <Stack vertical spacing="tight">
                 <Stack.Item>
