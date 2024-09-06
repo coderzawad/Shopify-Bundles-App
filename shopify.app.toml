@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+
+client_id = "2b8c014c61b5cd9be05086a0f479018e"
+name = "bundles-app"
+handle = "bundles-app-48"
+application_url = "https://hollow-renewal-peoples-intro.trycloudflare.com"
+embedded = true
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "archbtw.myshopify.com"
+include_config_on_deploy = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://hollow-renewal-peoples-intro.trycloudflare.com/auth/callback",
+  "https://hollow-renewal-peoples-intro.trycloudflare.com/auth/shopify/callback",
+  "https://hollow-renewal-peoples-intro.trycloudflare.com/api/auth/callback"
+]
+
+[webhooks]
+api_version = "2024-07"
+
+[pos]
+embedded = false
