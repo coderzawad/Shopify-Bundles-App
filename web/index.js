@@ -82,28 +82,32 @@ app.post('/api/save-bundle', async (req, res) => {
   try {
     const session = res.locals.shopify.session; // Get the Shopify session
     
-    // Create the new bundle product
+    // Create the new product (which will act as the bundle)
     const newProduct = new shopify.api.rest.Product({ session });
-    
-    // Set the product details like title and variants (price)
     newProduct.title = title;
-    newProduct.body_html = "This is a bundle of products";
+    newProduct.body_html = `This bundle contains ${selectedProducts.length} products.`;
     newProduct.variants = [
       {
         price: price,
-        inventory_quantity: 100,  // Example: You can adjust this based on your requirements
+        inventory_quantity: 100,  // Set a high quantity, or manage through individual items
       },
     ];
+
+    // Optionally add a tag like 'bundle' to identify it as a bundle
+    newProduct.tags = "bundle";
     
-    // Save the new product (bundle) in Shopify
+    // Save the bundle product to Shopify
     await newProduct.save();
 
-    // Attach the selected products to the bundle, e.g., using metafields or tags
+    // Attach the selected products using metafields
     const productIds = selectedProducts.map(product => product.id);
     const metafield = new shopify.api.rest.Metafield({ session });
-    metafield.namespace = 'bundles';
+    metafield.namespace = 'bundle';
     metafield.key = 'bundled_products';
-    metafield.value = JSON.stringify(productIds); // Store selected products' IDs
+    metafield.value = JSON.stringify({
+      product_ids: productIds,
+      item_count: selectedProducts.length
+    });
     metafield.type = 'json_string';
     metafield.owner_id = newProduct.id;
     metafield.owner_resource = 'product';
@@ -117,7 +121,6 @@ app.post('/api/save-bundle', async (req, res) => {
     res.status(500).json({ message: 'Failed to create bundle', error: e.message });
   }
 });
-
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
