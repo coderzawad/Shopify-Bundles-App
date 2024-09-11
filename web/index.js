@@ -79,63 +79,45 @@ app.post('/api/save-bundle', async (req, res) => {
     return res.status(400).json({ message: 'Invalid data' });
   }
 
-
   try {
-    // Create a product in Shopify
-
-    const createProductResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': "757047dda64718c8cd95afbb322d36ab",
+    const session = res.locals.shopify.session; // Get the Shopify session
+    
+    // Create the new bundle product
+    const newProduct = new shopify.api.rest.Product({ session });
+    
+    // Set the product details like title and variants (price)
+    newProduct.title = title;
+    newProduct.body_html = "This is a bundle of products";
+    newProduct.variants = [
+      {
+        price: price,
+        inventory_quantity: 100,  // Example: You can adjust this based on your requirements
       },
-      body: JSON.stringify({
-        product: {
-          title,
-          body_html: 'This is a bundle of products.',
-          vendor: 'Your Store',
-          product_type: 'Bundle',
-          variants: [{ price }],  // Use the calculated price from the frontend
-        },
-      }),
-    });
+    ];
+    
+    // Save the new product (bundle) in Shopify
+    await newProduct.save();
 
-    if (!createProductResponse.ok) {
-      const errorData = await createProductResponse.json();
-      throw new Error(`Failed to create product: ${errorData.errors}`);
-    }
+    // Attach the selected products to the bundle, e.g., using metafields or tags
+    const productIds = selectedProducts.map(product => product.id);
+    const metafield = new shopify.api.rest.Metafield({ session });
+    metafield.namespace = 'bundles';
+    metafield.key = 'bundled_products';
+    metafield.value = JSON.stringify(productIds); // Store selected products' IDs
+    metafield.type = 'json_string';
+    metafield.owner_id = newProduct.id;
+    metafield.owner_resource = 'product';
 
-    const createProductData = await createProductResponse.json();
-    const productId = createProductData.product.id;
+    // Save the metafield to associate products with the bundle
+    await metafield.save();
 
-    // Optionally, add metafields or custom fields here
-    const metafieldResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${productId}/metafields.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': ACCESS_TOKEN,
-      },
-      body: JSON.stringify({
-        metafield: {
-          namespace: 'bundles',
-          key: 'products',
-          value: JSON.stringify(selectedProducts),
-          value_type: 'json_string',
-        },
-      }),
-    });
-
-    if (!metafieldResponse.ok) {
-      const errorData = await metafieldResponse.json();
-      throw new Error(`Failed to add metafield: ${errorData.errors}`);
-    }
-
-    res.status(201).json({ message: 'Bundle saved and product created successfully!' });
-  } catch (error) {
-    console.error('Error creating product or saving bundle:', error.message);
-    res.status(500).json({ message: 'Failed to save bundle and create product' });
+    res.status(200).json({ message: 'Bundle created successfully', product: newProduct });
+  } catch (e) {
+    console.log('Error creating bundle:', e);
+    res.status(500).json({ message: 'Failed to create bundle', error: e.message });
   }
 });
+
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
