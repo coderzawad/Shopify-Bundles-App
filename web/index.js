@@ -79,8 +79,10 @@ app.post('/api/save-bundle', async (req, res) => {
     return res.status(400).json({ message: 'Invalid data' });
   }
 
+
   try {
     // Create a product in Shopify
+
     const createProductResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
       method: 'POST',
       headers: {

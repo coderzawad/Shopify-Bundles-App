@@ -10,8 +10,10 @@ import {
 } from "@shopify/polaris";
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
+import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
 
 export default function BundlePage() {
+  const fetch = useAuthenticatedFetch()
   const [title, setTitle] = useState(""); 
   const [selectedProductsCount, setSelectedProductsCount] = useState(0); 
   const [selectedProducts, setSelectedProducts] = useState([]); 
@@ -38,7 +40,7 @@ export default function BundlePage() {
           },
           body: JSON.stringify({
             title,
-            price: totalPrice.toFixed(2), // Send calculated total price
+            price: totalPrice, // Send calculated total price
             selectedProducts,
           }),
         });
