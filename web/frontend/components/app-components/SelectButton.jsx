@@ -14,12 +14,20 @@ function ProductSelectButton({ onProductSelect }) {
       imageSrc: product.images[0]?.originalSrc || '',  // Get product image
       price: product.variants[0]?.price || 'N/A',      // Get product price
     }));
-    setSelectedProducts((prevProducts) => [...prevProducts, ...products]); // Add new products to the list
+  
+    // Combine the previous and newly selected products
+    const updatedSelectedProducts = [...selectedProducts, ...products];
+    
+    // Update the local state
+    setSelectedProducts(updatedSelectedProducts);
+    
+    // Close the picker
     setPickerOpen(false);
-
-    // Pass the count to the parent
-    onProductSelect(selectedProducts.length + products.length);
+    
+    // Pass the updated products and count to the parent
+    onProductSelect(updatedSelectedProducts.length, updatedSelectedProducts);
   }, [onProductSelect, selectedProducts]);
+  
 
   return (
     <div>

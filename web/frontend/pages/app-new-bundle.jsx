@@ -17,12 +17,14 @@ export default function BundlePage() {
   const [selectedProductsCount, setSelectedProductsCount] = useState(0); 
   const [selectedProducts, setSelectedProducts] = useState([]); 
 
-  const handleTitleChange = (value) => setTitle(value);
-
   const handleProductSelect = (count, products) => {
+    console.log("Selected Products Count:", count); // Log count
+    console.log("Selected Products:", products);    // Log products array
+  
     setSelectedProductsCount(count);
-    setSelectedProducts(products);
+    setSelectedProducts(products);  // Correctly update the state with the selected products
   };
+  
   
   const handleSave = async () => {
     if (title && selectedProductsCount > 0) {
@@ -75,7 +77,7 @@ export default function BundlePage() {
             <TextField
               label="Title"
               value={title}
-              onChange={handleTitleChange}
+              onChange={(e)=>{setTitle(e.target.value)}}
               placeholder="Enter bundle title"
             />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
