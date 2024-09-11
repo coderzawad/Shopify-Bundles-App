@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://trademarks-cap-temperature-eddie.trycloudflare.com"
+application_url = "https://copying-programmers-diploma-met.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://trademarks-cap-temperature-eddie.trycloudflare.com/auth/callback",
-  "https://trademarks-cap-temperature-eddie.trycloudflare.com/auth/shopify/callback",
-  "https://trademarks-cap-temperature-eddie.trycloudflare.com/api/auth/callback"
+  "https://copying-programmers-diploma-met.trycloudflare.com/auth/callback",
+  "https://copying-programmers-diploma-met.trycloudflare.com/auth/shopify/callback",
+  "https://copying-programmers-diploma-met.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
