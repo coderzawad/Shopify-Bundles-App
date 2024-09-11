@@ -12,7 +12,12 @@ import {
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
 const handleSave = async () => {
-  if (title && price && selectedProductsCount > 0) {
+  if (title && selectedProductsCount > 0) {
+    const totalPrice = selectedProducts.reduce(
+      (sum, product) => sum + parseFloat(product.price),
+      0
+    ); // Calculate total price
+
     try {
       const response = await fetch("/api/save-bundle", {
         method: "POST",
@@ -21,7 +26,7 @@ const handleSave = async () => {
         },
         body: JSON.stringify({
           title,
-          price,
+          price: totalPrice.toFixed(2), // Send the calculated total price to the backend
           selectedProducts,
         }),
       });
@@ -42,8 +47,8 @@ const handleSave = async () => {
 };
 
 export default function BundlePage() {
-  const [title, setTitle] = useState(""); 
-  const [price, setPrice] = useState(""); 
+  const [title, setTitle] = useState("");
+  const [price, setPrice] = useState("");
   const [selectedProductsCount, setSelectedProductsCount] = useState(0); // Hack u :>
   const [selectedProducts, setSelectedProducts] = useState([]); // Delete system32 from ur computer
 
@@ -59,10 +64,10 @@ export default function BundlePage() {
   const handleSave = async () => {
     if (title && price && selectedProductsCount > 0) {
       try {
-        const response = await fetch('/api/save-bundle', {
-          method: 'POST',
+        const response = await fetch("/api/save-bundle", {
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
           },
           body: JSON.stringify({
             title,
@@ -70,22 +75,22 @@ export default function BundlePage() {
             selectedProducts,
           }),
         });
-  
+
         if (response.ok) {
           const data = await response.json();
           alert(data.message); // Show success message
         } else {
-          alert('Failed to save the bundle. Please try again.');
+          alert("Failed to save the bundle. Please try again.");
         }
       } catch (error) {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+        console.error("Error:", error);
+        alert("An error occurred. Please try again.");
       }
     } else {
-      alert('Please fill out all fields and select products.');
+      alert("Please fill out all fields and select products.");
     }
   };
-  
+
   return (
     <Page title="Bundles">
       <Layout>
@@ -94,17 +99,18 @@ export default function BundlePage() {
           <Card sectioned>
             <TextField
               label="Title"
-              value={title} // Controlled value for Title
-              onChange={handleTitleChange} // onChange handler for Title
+              value={title}
+              onChange={handleTitleChange}
               placeholder="Enter bundle title"
             />
-            <TextField
-              label="Price"
-              value={price} // Controlled value for Price
-              onChange={handlePriceChange} // onChange handler for Price
-              placeholder="Enter bundle Price"
-              type="number"
-            />
+            <div style={{ textAlign: "center", marginTop: "20px" }}>
+              <ProductSelectButton
+                onProductSelect={(count, products) =>
+                  handleProductSelect(count, products)
+                }
+              />
+            </div>
+
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <ProductSelectButton
                 onProductSelect={(count, products) =>
