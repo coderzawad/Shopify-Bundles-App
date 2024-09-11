@@ -87,7 +87,7 @@ app.post('/api/save-bundle', async (req, res) => {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': ACCESS_TOKEN,
+        'X-Shopify-Access-Token': "757047dda64718c8cd95afbb322d36ab",
       },
       body: JSON.stringify({
         product: {
