@@ -8,7 +8,6 @@ import mongoose from "mongoose";
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
-import {useAuthenticatedFetch} from "./frontend/hooks/useAuthenticatedFetch"
 
 const SHOPIFY_DOMAIN = 'archbtw.myshopify.com';
 const ACCESS_TOKEN = '757047dda64718c8cd95afbb322d36ab';
@@ -73,9 +72,7 @@ app.get("/api/products/create", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-app.post('/api/save-bundle', async (req, res) => {
-
-  const fetch = useAuthenticatedFetch()
+app.post('/api/save-bundle', async (req, res) => { 
 
   const { title, price, selectedProducts } = req.body;
 
@@ -113,10 +110,6 @@ app.post('/api/save-bundle', async (req, res) => {
     // Optionally, add metafields or custom fields here
     const metafieldResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${productId}/metafields.json`, {
       method: 'POST',
-      headers: {
-        'X-Shopify-Access-Token': ACCESS_TOKEN,
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify({
         metafield: {
           namespace: 'bundles',
