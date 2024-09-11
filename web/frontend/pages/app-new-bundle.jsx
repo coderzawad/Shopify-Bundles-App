@@ -11,7 +11,6 @@ import {
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
 import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
-
 export default function BundlePage() {
   const fetch = useAuthenticatedFetch()
   const [title, setTitle] = useState(""); 
@@ -24,13 +23,17 @@ export default function BundlePage() {
     setSelectedProductsCount(count);
     setSelectedProducts(products);
   };
-
+  
   const handleSave = async () => {
     if (title && selectedProductsCount > 0) {
       // Ensure selectedProducts is always an array
       const totalPrice = (selectedProducts || []).reduce((sum, product) => {
-        return sum + parseFloat(product.price || 0); // Ensure product.price is a number
+        const price = parseFloat(product.price); // Convert the price to a float
+        return sum + (isNaN(price) ? 0 : price); // Ensure price is a valid number and add it to the sum
       }, 0);
+      
+      console.log("Selected Products:", selectedProducts); // Log selected products for debugging
+      console.log("Total Price:", totalPrice); // Log the total price for debugging
   
       try {
         const response = await fetch("/api/save-bundle", {
@@ -40,7 +43,7 @@ export default function BundlePage() {
           },
           body: JSON.stringify({
             title,
-            price: totalPrice, // Send calculated total price
+            price: totalPrice.toFixed(2), // Use the calculated total price and format it to 2 decimal places
             selectedProducts,
           }),
         });
@@ -59,6 +62,8 @@ export default function BundlePage() {
       alert("Please fill out all fields and select products.");
     }
   };
+  
+  
   
 
   return (
