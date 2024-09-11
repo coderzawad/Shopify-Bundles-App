@@ -17,25 +17,23 @@ export default function BundlePage() {
   const [selectedProductsCount, setSelectedProductsCount] = useState(0); 
   const [selectedProducts, setSelectedProducts] = useState([]); 
 
+  const handleTitleChange = (value) => setTitle(value);
+
   const handleProductSelect = (count, products) => {
-    console.log("Selected Products Count:", count); // Log count
-    console.log("Selected Products:", products);    // Log products array
-  
     setSelectedProductsCount(count);
-    setSelectedProducts(products);  // Correctly update the state with the selected products
+    setSelectedProducts(products);
   };
-  
   
   const handleSave = async () => {
     if (title && selectedProductsCount > 0) {
-      // Ensure selectedProducts is always an array
       const totalPrice = (selectedProducts || []).reduce((sum, product) => {
-        const price = parseFloat(product.price); // Convert the price to a float
-        return sum + (isNaN(price) ? 0 : price); // Ensure price is a valid number and add it to the sum
+        // Log the product and price for debugging 🥲
+        console.log(product);
+        const price = parseFloat(product.price);
+        return sum + (isNaN(price) ? 0 : price); // Ensure price is a valid number 🤓
       }, 0);
-      
-      console.log("Selected Products:", selectedProducts); // Log selected products for debugging
-      console.log("Total Price:", totalPrice); // Log the total price for debugging
+  
+      console.log("Total Price:", totalPrice); // Log the total price 😃
   
       try {
         const response = await fetch("/api/save-bundle", {
@@ -45,7 +43,7 @@ export default function BundlePage() {
           },
           body: JSON.stringify({
             title,
-            price: totalPrice.toFixed(2), // Use the calculated total price and format it to 2 decimal places
+            price: totalPrice.toFixed(2), // Send calculated total price fire
             selectedProducts,
           }),
         });
@@ -66,7 +64,6 @@ export default function BundlePage() {
   };
   
   
-  
 
   return (
     <Page title="Bundles">
@@ -77,7 +74,7 @@ export default function BundlePage() {
             <TextField
               label="Title"
               value={title}
-              onChange={(e)=>{setTitle(e.target.value)}}
+              onChange={handleTitleChange}
               placeholder="Enter bundle title"
             />
             <div style={{ textAlign: "center", marginTop: "20px" }}>
