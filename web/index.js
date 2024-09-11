@@ -9,8 +9,7 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-const SHOPIFY_DOMAIN = 'archbtw.myshopify.com';
-const ACCESS_TOKEN = '757047dda64718c8cd95afbb322d36ab';
+
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -72,65 +71,7 @@ app.get("/api/products/create", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-app.post('/api/save-bundle', async (req, res) => { 
 
-  const { title, price, selectedProducts } = req.body;
-
-  if (!title || !price || !Array.isArray(selectedProducts)) {
-    return res.status(400).json({ message: 'Invalid data' });
-  }
-
-  try {
-    // Create a product in Shopify
-    const createProductResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
-      method: 'POST',
-      headers: {
-        'X-Shopify-Access-Token': ACCESS_TOKEN,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        product: {
-          title,
-          body_html: 'This is a bundle of products.',
-          vendor: 'Your Store',
-          product_type: 'Bundle',
-          variants: [{ price }],
-        },
-      }),
-    });
-
-    if (!createProductResponse.ok) {
-      const errorData = await createProductResponse.json();
-      throw new Error(`Failed to create product: ${errorData.errors}`);
-    }
-
-    const createProductData = await createProductResponse.json();
-    const productId = createProductData.product.id;
-
-    // Optionally, add metafields or custom fields here
-    const metafieldResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${productId}/metafields.json`, {
-      method: 'POST',
-      body: JSON.stringify({
-        metafield: {
-          namespace: 'bundles',
-          key: 'products',
-          value: JSON.stringify(selectedProducts),
-          value_type: 'json_string',
-        },
-      }),
-    });
-
-    if (!metafieldResponse.ok) {
-      const errorData = await metafieldResponse.json();
-      throw new Error(`Failed to add metafield: ${errorData.errors}`);
-    }
-
-    res.status(201).json({ message: 'Bundle saved and product created successfully!' });
-  } catch (error) {
-    console.error('Error creating product or saving bundle:', error.message);
-    res.status(500).json({ message: 'Failed to save bundle and create product' });
-  }
-});
 
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
