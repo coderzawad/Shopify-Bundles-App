@@ -72,11 +72,10 @@ app.get("/api/products/create", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-app.post('/api/save-bundle', async (req, res) => { 
-
+app.post('/api/save-bundle', async (req, res) => {
   const { title, price, selectedProducts } = req.body;
 
-  if (!title || !price || !Array.isArray(selectedProducts)) {
+  if (!title || !Array.isArray(selectedProducts) || selectedProducts.length === 0) {
     return res.status(400).json({ message: 'Invalid data' });
   }
 
@@ -85,8 +84,8 @@ app.post('/api/save-bundle', async (req, res) => {
     const createProductResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products.json`, {
       method: 'POST',
       headers: {
-
         'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': ACCESS_TOKEN,
       },
       body: JSON.stringify({
         product: {
@@ -94,7 +93,7 @@ app.post('/api/save-bundle', async (req, res) => {
           body_html: 'This is a bundle of products.',
           vendor: 'Your Store',
           product_type: 'Bundle',
-          variants: [{ price }],
+          variants: [{ price }],  // Use the calculated price from the frontend
         },
       }),
     });
@@ -110,6 +109,10 @@ app.post('/api/save-bundle', async (req, res) => {
     // Optionally, add metafields or custom fields here
     const metafieldResponse = await fetch(`https://${SHOPIFY_DOMAIN}/admin/api/2024-01/products/${productId}/metafields.json`, {
       method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': ACCESS_TOKEN,
+      },
       body: JSON.stringify({
         metafield: {
           namespace: 'bundles',

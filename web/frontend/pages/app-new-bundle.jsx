@@ -6,55 +6,17 @@ import {
   Button,
   Stack,
   TextStyle,
-  DisplayText,
   Badge,
 } from "@shopify/polaris";
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
-const handleSave = async () => {
-  if (title && selectedProductsCount > 0) {
-    const totalPrice = selectedProducts.reduce(
-      (sum, product) => sum + parseFloat(product.price),
-      0
-    ); // Calculate total price
-
-    try {
-      const response = await fetch("/api/save-bundle", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          title,
-          price: totalPrice.toFixed(2), // Send the calculated total price to the backend
-          selectedProducts,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        alert(data.message); // Show success message
-      } else {
-        alert("Failed to save the bundle. Please try again.");
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      alert("An error occurred. Please try again.");
-    }
-  } else {
-    alert("Please fill out all fields and select products.");
-  }
-};
 
 export default function BundlePage() {
-  const [title, setTitle] = useState("");
-  const [price, setPrice] = useState("");
-  const [selectedProductsCount, setSelectedProductsCount] = useState(0); // Hack u :>
-  const [selectedProducts, setSelectedProducts] = useState([]); // Delete system32 from ur computer
+  const [title, setTitle] = useState(""); 
+  const [selectedProductsCount, setSelectedProductsCount] = useState(0); 
+  const [selectedProducts, setSelectedProducts] = useState([]); 
 
   const handleTitleChange = (value) => setTitle(value);
-
-  const handlePriceChange = (value) => setPrice(value);
 
   const handleProductSelect = (count, products) => {
     setSelectedProductsCount(count);
@@ -62,7 +24,12 @@ export default function BundlePage() {
   };
 
   const handleSave = async () => {
-    if (title && price && selectedProductsCount > 0) {
+    if (title && selectedProductsCount > 0) {
+      // Ensure selectedProducts is always an array
+      const totalPrice = (selectedProducts || []).reduce((sum, product) => {
+        return sum + parseFloat(product.price || 0); // Ensure product.price is a number
+      }, 0);
+  
       try {
         const response = await fetch("/api/save-bundle", {
           method: "POST",
@@ -71,11 +38,11 @@ export default function BundlePage() {
           },
           body: JSON.stringify({
             title,
-            price,
+            price: totalPrice.toFixed(2), // Send calculated total price
             selectedProducts,
           }),
         });
-
+  
         if (response.ok) {
           const data = await response.json();
           alert(data.message); // Show success message
@@ -90,6 +57,7 @@ export default function BundlePage() {
       alert("Please fill out all fields and select products.");
     }
   };
+  
 
   return (
     <Page title="Bundles">
@@ -103,14 +71,6 @@ export default function BundlePage() {
               onChange={handleTitleChange}
               placeholder="Enter bundle title"
             />
-            <div style={{ textAlign: "center", marginTop: "20px" }}>
-              <ProductSelectButton
-                onProductSelect={(count, products) =>
-                  handleProductSelect(count, products)
-                }
-              />
-            </div>
-
             <div style={{ textAlign: "center", marginTop: "20px" }}>
               <ProductSelectButton
                 onProductSelect={(count, products) =>
@@ -133,18 +93,12 @@ export default function BundlePage() {
                 <Stack.Item>
                   <Badge>{selectedProductsCount}/30 bundled products</Badge>
                 </Stack.Item>
-                <Stack.Item>
-                  <Badge>0/3 options</Badge>
-                </Stack.Item>
-                <Stack.Item>
-                  <Badge>0/100 variants</Badge>
-                </Stack.Item>
               </Stack>
               <div style={{ marginTop: "20px" }}>
-                {/* Enable the button only if the title, price, and products are provided */}
+                {/* Enable the button only if the title and products are provided */}
                 <Button
                   primary
-                  disabled={!title || !price || selectedProductsCount === 0}
+                  disabled={!title || selectedProductsCount === 0} 
                   onClick={handleSave}
                 >
                   Save and continue

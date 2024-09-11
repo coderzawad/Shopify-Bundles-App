@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://insert-gentle-licenses-council.trycloudflare.com"
+application_url = "https://reprints-auditor-mauritius-tr.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://insert-gentle-licenses-council.trycloudflare.com/auth/callback",
-  "https://insert-gentle-licenses-council.trycloudflare.com/auth/shopify/callback",
-  "https://insert-gentle-licenses-council.trycloudflare.com/api/auth/callback"
+  "https://reprints-auditor-mauritius-tr.trycloudflare.com/auth/callback",
+  "https://reprints-auditor-mauritius-tr.trycloudflare.com/auth/shopify/callback",
+  "https://reprints-auditor-mauritius-tr.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
