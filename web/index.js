@@ -9,8 +9,8 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-const SHOPIFY_DOMAIN = 'archbtw.myshopify.com';
-const ACCESS_TOKEN = '757047dda64718c8cd95afbb322d36ab';
+const SHOPIFY_DOMAIN = "archbtw.myshopify.com";
+const ACCESS_TOKEN = "757047dda64718c8cd95afbb322d36ab";
 
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
@@ -46,10 +46,9 @@ app.use(express.json());
 // Database connection
 mongoose
   .connect(`${process.env.DB_URL}+${process.env.DB_NAME}`)
-  .then(() => console.log('db connected'))
-  .catch((err) => console.log(err,'error not connected'))
+  .then(() => console.log("db connected"))
+  .catch((err) => console.log(err, "error not connected"));
 // ------------------
-
 
 app.get("/api/products/count", async (_req, res) => {
   const countData = await shopify.api.rest.Product.count({
@@ -72,16 +71,20 @@ app.get("/api/products/create", async (_req, res) => {
   res.status(status).send({ success: status === 200, error });
 });
 
-app.post('/api/save-bundle', async (req, res) => {
+app.post("/api/save-bundle", async (req, res) => {
   const { title, price, selectedProducts } = req.body;
 
-  if (!title || !Array.isArray(selectedProducts) || selectedProducts.length === 0) {
-    return res.status(400).json({ message: 'Invalid data' });
+  if (
+    !title ||
+    !Array.isArray(selectedProducts) ||
+    selectedProducts.length === 0
+  ) {
+    return res.status(400).json({ message: "Invalid data" });
   }
 
   try {
     const session = res.locals.shopify.session; // Get the Shopify session
-    
+
     // Create the new product (which will act as the bundle)
     const newProduct = new shopify.api.rest.Product({ session });
     newProduct.title = title;
@@ -89,36 +92,40 @@ app.post('/api/save-bundle', async (req, res) => {
     newProduct.variants = [
       {
         price: price,
-        inventory_quantity: 100,  // Set a high quantity, or manage through individual items
+        inventory_quantity: 100, // Set a high quantity, or manage through individual items
       },
     ];
 
     // Optionally add a tag like 'bundle' to identify it as a bundle
     newProduct.tags = "bundle";
-    
+
     // Save the bundle product to Shopify
     await newProduct.save();
 
     // Attach the selected products using metafields
-    const productIds = selectedProducts.map(product => product.id);
+    const productIds = selectedProducts.map((product) => product.id);
     const metafield = new shopify.api.rest.Metafield({ session });
-    metafield.namespace = 'bundle';
-    metafield.key = 'bundled_products';
+    metafield.namespace = "bundle";
+    metafield.key = "bundled_products";
     metafield.value = JSON.stringify({
       product_ids: productIds,
-      item_count: selectedProducts.length
+      item_count: selectedProducts.length,
     });
-    metafield.type = 'json_string';
+    metafield.type = "json_string";
     metafield.owner_id = newProduct.id;
-    metafield.owner_resource = 'product';
+    metafield.owner_resource = "product";
 
     // Save the metafield to associate products with the bundle
     await metafield.save();
 
-    res.status(200).json({ message: 'Bundle created successfully', product: newProduct });
+    res
+      .status(200)
+      .json({ message: "Bundle created successfully", product: newProduct });
   } catch (e) {
-    console.log('Error creating bundle:', e);
-    res.status(500).json({ message: 'Failed to create bundle', error: e.message });
+    console.log("Error creating bundle:", e);
+    res
+      .status(500)
+      .json({ message: "Failed to create bundle", error: e.message });
   }
 });
 

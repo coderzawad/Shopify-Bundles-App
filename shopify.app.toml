@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://stake-tricks-maintained-protocols.trycloudflare.com"
+application_url = "https://browsers-fathers-qualifications-midwest.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://stake-tricks-maintained-protocols.trycloudflare.com/auth/callback",
-  "https://stake-tricks-maintained-protocols.trycloudflare.com/auth/shopify/callback",
-  "https://stake-tricks-maintained-protocols.trycloudflare.com/api/auth/callback"
+  "https://browsers-fathers-qualifications-midwest.trycloudflare.com/auth/callback",
+  "https://browsers-fathers-qualifications-midwest.trycloudflare.com/auth/shopify/callback",
+  "https://browsers-fathers-qualifications-midwest.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
