@@ -53,6 +53,7 @@ function BundlePage() {
           display: "flex",
           justifyContent: "flex-end",
           margin: "16px 0",
+          "gap" : "10px"
         }}
       >
         <Button>View in product list</Button>
