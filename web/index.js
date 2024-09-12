@@ -129,6 +129,23 @@ app.post("/api/save-bundle", async (req, res) => {
   }
 });
 
+app.get('/api/get-bundles', async (req, res) => {
+  try {
+    const session = res.locals.shopify.session;
+    
+    // Fetch the bundles (assuming you save them as products with a 'bundle' tag)
+    const bundles = await shopify.api.rest.Product.all({
+      session,
+      params: { tag: 'bundle' } // Fetch products with a 'bundle' tag
+    });
+    
+    res.status(200).json({ bundles });
+  } catch (error) {
+    console.error('Error fetching bundles:', error);
+    res.status(500).json({ error: 'Failed to fetch bundles' });
+  }
+});
+
 app.use(shopify.cspHeaders());
 app.use(serveStatic(STATIC_PATH, { index: false }));
 
