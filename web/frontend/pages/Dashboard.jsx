@@ -6,13 +6,17 @@ import {
   TextStyle,
   Stack,
   Card,
+  ButtonGroup
 } from "@shopify/polaris";
+import {useAppBridge} from "@shopify/app-bridge-react";
+import { Link, useNavigate } from "react-router-dom"; 
 import React, { useEffect, useState } from "react";
 import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
 
 function BundlePage() {
   const [bundles, setBundles] = useState([]);  // Filtered bundle products
   const fetch = useAuthenticatedFetch();       // Shopify authenticated fetch
+  const navigate = useNavigate();              // For programmatic navigation
 
   // Fetch products from the backend
   useEffect(() => {
@@ -45,6 +49,15 @@ function BundlePage() {
     plural: "bundles",
   };
 
+  const bridge = useAppBridge();
+  const handleViewInProductList = () => {
+    // Construct URL with filters
+    const shopUrl = `https://${atob(new URLSearchParams(location.search).get("host"))}`;
+    console.log(shopUrl);
+    const url = `${shopUrl}/products?tag=bundle`;
+    window.open(url, "_blank");  // Redirect to the constructed URL
+  };
+
   return (
     <Page title="Bundles" divider>
       {/* Buttons for Actions */}
@@ -56,8 +69,10 @@ function BundlePage() {
           gap: "10px",
         }}
       >
-        <Button plain>View in product list</Button>
-        <Button primary>Create bundle</Button>
+        <ButtonGroup>
+          <Button onClick={handleViewInProductList}>View in product list</Button>
+          <Button variant="primary"><Link to="/app-new-bundle">Create bundle</Link></Button>
+        </ButtonGroup>
       </div>
 
       {/* Display Bundles */}

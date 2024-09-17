@@ -98,6 +98,8 @@ app.post("/api/save-bundle", async (req, res) => {
 
     // Optionally add a tag like 'bundle' to identify it as a bundle
     newProduct.tags = "bundle";
+    newProduct.vendor = "Bundle Builder"
+    newProduct.product_type = "bundle"
 
     // Save the bundle product to Shopify
     await newProduct.save();
