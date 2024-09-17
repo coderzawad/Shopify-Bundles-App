@@ -136,7 +136,7 @@ app.get('/api/get-bundles', async (req, res) => {
     // Fetch the bundles (assuming you save them as products with a 'bundle' tag)
     const bundles = await shopify.api.rest.Product.all({
       session,
-      params: { tag: 'bundle' } // Fetch products with a 'bundle' tag
+      params: { tagged_with: 'bundle' } // Fetch products with a 'bundle' tag
     });
     
     res.status(200).json({ bundles });

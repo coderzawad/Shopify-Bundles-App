@@ -1,7 +1,5 @@
 import {
   Page,
-  Layout,
-  Banner,
   ResourceList,
   ResourceItem,
   Button,
@@ -13,23 +11,33 @@ import React, { useEffect, useState } from "react";
 import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
 
 function BundlePage() {
-  const [bundles, setBundles] = useState([]); // State to store bundles
-  const fetch = useAuthenticatedFetch(); // Fetch hook
+  const [bundles, setBundles] = useState([]);  // Filtered bundle products
+  const fetch = useAuthenticatedFetch();       // Shopify authenticated fetch
 
-  // Fetch bundles from the backend
+  // Fetch products from the backend
   useEffect(() => {
-    const fetchBundles = async () => {
+    const fetchProducts = async () => {
       try {
         const response = await fetch("/api/get-bundles");
         if (response.ok) {
           const data = await response.json();
-          setBundles(data.bundles); // Assuming the backend sends the bundles in `data.bundles`
+          console.log(data); // Log to inspect the full structure
+  
+          // Access the correct array inside `bundles.data`
+          if (Array.isArray(data.bundles.data)) {
+            const bundleProducts = data.bundles.data.filter(
+              product => product.tags && product.tags.includes("bundle")
+            );
+            setBundles(bundleProducts); // Update state with filtered bundles
+          } else {
+            console.error("Error: Expected an array, but got:", data.bundles.data);
+          }
         }
       } catch (error) {
-        console.error("Error fetching bundles:", error);
+        console.error("Error fetching products:", error);
       }
     };
-    fetchBundles();
+    fetchProducts();
   }, [fetch]);
 
   const resourceName = {
@@ -38,47 +46,42 @@ function BundlePage() {
   };
 
   return (
-    <Page title="Bundles">
-      {/* Top Banner */}
-      <Banner
-        title="Enabling certain features in your store may prevent you from selling bundles."
-        status="info"
-        action={{ content: "Learn more about Shopify Bundles compatibility" }}
-        onDismiss={() => {}}
-      />
-
+    <Page title="Bundles" divider>
       {/* Buttons for Actions */}
       <div
         style={{
           display: "flex",
           justifyContent: "flex-end",
           margin: "16px 0",
-          "gap" : "10px"
+          gap: "10px",
         }}
       >
-        <Button>View in product list</Button>
-        <Button variant="primary" url="/app-new-bundle">
-          Create bundle
-        </Button>
+        <Button plain>View in product list</Button>
+        <Button primary>Create bundle</Button>
       </div>
 
-      {/* List of Bundles */}
-      <Card>
+      {/* Display Bundles */}
+      <Card title="Bundle Products" sectioned>
         <ResourceList
           resourceName={resourceName}
-          items={bundles}
+          items={bundles} // Render only bundle products
           renderItem={(item) => {
-            const { id, title, price } = item;
+            const { id, title, variants } = item;
+            const price = variants && variants.length > 0 ? variants[0].price : "No price available"; // Get the price from the first variant
             return (
               <ResourceItem id={id}>
-                <Stack>
+                <Stack distribution="equalSpacing" alignment="center">
                   <Stack.Item fill>
-                    <h3>
+                    <h3 style={{ marginBottom: 0 }}>
                       <TextStyle variation="strong">{title}</TextStyle>
                     </h3>
                   </Stack.Item>
                   <Stack.Item>
-                    <TextStyle>{price}</TextStyle>
+                    <TextStyle variation="subdued">
+                      <span style={{ fontSize: "16px", fontWeight: "bold", color: "#5C6AC4" }}>
+                        ${parseFloat(price).toFixed(2)}
+                      </span>
+                    </TextStyle>
                   </Stack.Item>
                 </Stack>
               </ResourceItem>
@@ -105,6 +108,7 @@ function BundlePage() {
                 👍
               </span>
             }
+
           >
             Good
           </Button>
@@ -114,6 +118,7 @@ function BundlePage() {
                 👎
               </span>
             }
+
           >
             Bad
           </Button>
