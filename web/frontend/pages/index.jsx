@@ -7,12 +7,11 @@ import {
   Stack,
   Card,
   ButtonGroup,
-  Link,
   Toast,
-  Frame, // Import Frame for the Toast
+  Frame
 } from "@shopify/polaris";
 
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
 
@@ -52,9 +51,9 @@ function BundlePage() {
   const [bundles, setBundles] = useState([]);
   const fetch = useAuthenticatedFetch();
   const navigate = useNavigate();
-  const [showToast, setShowToast] = useState(false); // State for toast visibility
-  const [toastMessage, setToastMessage] = useState(""); // State for toast message
-
+  const [showToast, setShowToast] = useState(false);  // State for toast visibility
+  const [toastMessage, setToastMessage] = useState("")
+  
   // Fetch products from the backend
   useEffect(() => {
     const fetchProducts = async () => {
@@ -75,7 +74,7 @@ function BundlePage() {
   }, [fetch]);
 
   // Sort bundles by price (higher to lower)
-  const sortedBundles = mergeSort(bundles, "price");
+  const sortedBundles = mergeSort(bundles, 'price');
 
   const resourceName = {
     singular: "bundle",
@@ -106,12 +105,9 @@ function BundlePage() {
       }
 
       // Show custom toast message based on feedback type
-      const message =
-        type === "good"
-          ? "Thanks for your positive feedback! 😊"
-          : "Thanks for your feedback, we’ll work on it! 👷‍♂️";
+      const message = type === "good" ? "Thanks for your positive feedback! 😊" : "Thanks for your feedback, we’ll work on it! 👷‍♂️";
       setToastMessage(message);
-      setShowToast(true); // Display the toast
+      setShowToast(true);  // Display the toast
     } catch (error) {
       console.error("Error submitting feedback:", error);
       alert("Failed to submit feedback. Please try again later.");
@@ -119,31 +115,30 @@ function BundlePage() {
   };
 
   return (
-    <Frame> {/* Wrap content in Frame for Toast */}
-      <Page title="Bundles" divider>
-        {/* Buttons for Actions */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "flex-end",
-            margin: "16px 0",
-          }}
-        >
-          <ButtonGroup>
-            <Button plain onClick={handleViewInProductList} size="medium">
-              View in product list
+    <Page title="Bundles" divider>
+      {/* Buttons for Actions */}
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "flex-end",
+          margin: "16px 0",
+        }}
+      >
+        <ButtonGroup>
+          <Button plain onClick={handleViewInProductList} size="medium">
+            View in product list
+          </Button>
+          <Link to="/app-new-bundle" style={{ color: "white", textDecoration: "none" }}>
+            <Button primary size="medium">
+              Create bundle
             </Button>
-            <Link
-              to="/app-new-bundle"
-              style={{ color: "white", textDecoration: "none" }}
-            >
-              <Button primary size="medium">Create bundle</Button>
-            </Link>
-          </ButtonGroup>
-        </div>
+          </Link>
+        </ButtonGroup>
+      </div>
 
-        {/* Display Bundles */}
-        <Card title="Bundle Products" sectioned>
+      {/* Display Bundles */}
+      <Card title="Bundle Products" sectioned>
+        {sortedBundles.length > 0 ? (
           <ResourceList
             resourceName={resourceName}
             items={sortedBundles}
@@ -169,50 +164,30 @@ function BundlePage() {
               );
             }}
           />
-        </Card>
-
-        {/* Feedback Section */}
-        <Card title="Share your feedback" sectioned>
-          <p>How would you describe your experience using the Shopify Bundles app?</p>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              marginTop: "12px",
-            }}
-          >
-            <Button
-              icon={<span role="img" aria-label="thumbs up">👍</span>}
-              plain
-              onClick={() => submitFeedback("good")}
-            >
-              Good
-            </Button>
-            <Button
-              icon={<span role="img" aria-label="thumbs down">👎</span>}
-              plain
-              onClick={() => submitFeedback("bad")}
-            >
-              Bad
-            </Button>
-          </div>
-        </Card>
-
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <a
-            href="https://help.shopify.com/manual/products/bundles"
-            style={{ textDecoration: "none", color: "#5c6ac4" }}
-          >
-            Learn more about creating bundles
-          </a>
-        </div>
-
-        {/* Toast Notification */}
-        {showToast && (
-          <Toast content={toastMessage} onDismiss={() => setShowToast(false)} />
+        ) : (
+          <TextStyle variation="subdued">Nothing to show</TextStyle>
         )}
-      </Page>
-    </Frame>
+      </Card>
+
+      {/* Feedback Section */}
+      <Card title="Share your feedback" sectioned>
+        <p>How would you describe your experience using the Shopify Bundles app?</p>
+        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
+          <Button icon={<span role="img" aria-label="thumbs up">👍</span>} plain onClick={() => submitFeedback("good")}>
+            Good
+          </Button>
+          <Button icon={<span role="img" aria-label="thumbs down">👎</span>} plain onClick={() => submitFeedback("bad")}>
+            Bad
+          </Button>
+        </div>
+      </Card>
+
+      <div style={{ textAlign: "center", marginTop: "20px" }}>
+        <a href="https://help.shopify.com/manual/products/bundles" style={{ textDecoration: "none", color: "#5c6ac4" }}>
+          Learn more about creating bundles
+        </a>
+      </div>
+    </Page>
   );
 }
 
