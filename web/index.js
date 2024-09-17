@@ -4,7 +4,8 @@ import { readFileSync } from "fs";
 import express from "express";
 import serveStatic from "serve-static";
 import mongoose from "mongoose";
-
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
 import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
@@ -16,6 +17,13 @@ const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
   10
 );
+
+const openDb = async () => {
+  return open({
+    filename: '../web/frontend/database/feedback.db',
+    driver: sqlite3.Database
+  });
+};
 
 const STATIC_PATH =
   process.env.NODE_ENV === "production"
@@ -98,8 +106,8 @@ app.post("/api/save-bundle", async (req, res) => {
 
     // Optionally add a tag like 'bundle' to identify it as a bundle
     newProduct.tags = "bundle";
-    newProduct.vendor = "Bundle Builder"
-    newProduct.product_type = "bundle"
+    newProduct.vendor = "Bundle Builder";
+    newProduct.product_type = "bundle";
 
     // Save the bundle product to Shopify
     await newProduct.save();
@@ -131,20 +139,38 @@ app.post("/api/save-bundle", async (req, res) => {
   }
 });
 
-app.get('/api/get-bundles', async (req, res) => {
+app.get("/api/get-bundles", async (req, res) => {
   try {
     const session = res.locals.shopify.session;
-    
+
     // Fetch the bundles (assuming you save them as products with a 'bundle' tag)
     const bundles = await shopify.api.rest.Product.all({
       session,
-      params: { tagged_with: 'bundle' } // Fetch products with a 'bundle' tag
+      params: { tagged_with: "bundle" }, // Fetch products with a 'bundle' tag
     });
-    
+
     res.status(200).json({ bundles });
   } catch (error) {
-    console.error('Error fetching bundles:', error);
-    res.status(500).json({ error: 'Failed to fetch bundles' });
+    console.error("Error fetching bundles:", error);
+    res.status(500).json({ error: "Failed to fetch bundles" });
+  }
+});
+
+app.post('/api/feedback', async (req, res) => {
+  const { type } = req.body;
+
+  if (!type || !['good', 'bad'].includes(type)) {
+    return res.status(400).json({ message: 'Invalid feedback type' });
+  }
+
+  try {
+    const db = await openDb();
+    await db.run('INSERT INTO feedback (type) VALUES (?)', [type]);
+    await db.close();
+    res.status(200).json({ message: 'Feedback saved successfully' });
+  } catch (error) {
+    console.error('Error saving feedback:', error);
+    res.status(500).json({ message: 'Failed to save feedback', error: error.message });
   }
 });
 

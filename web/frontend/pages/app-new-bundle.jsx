@@ -10,12 +10,13 @@ import {
 } from "@shopify/polaris";
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
-import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
+import { useAuthenticatedFetch, useNavigate } from "@shopify/app-bridge-react";
 export default function BundlePage() {
   const fetch = useAuthenticatedFetch()
   const [title, setTitle] = useState(""); 
   const [selectedProductsCount, setSelectedProductsCount] = useState(0); 
   const [selectedProducts, setSelectedProducts] = useState([]); 
+  const navigate = useNavigate();
 
   const handleTitleChange = (value) => setTitle(value);
 
@@ -51,6 +52,8 @@ export default function BundlePage() {
   
         if (response.ok) {
           const data = await response.json();
+          // navigate
+          navigate("/")
           alert(data.message); // Show success message
         } else {
           alert("Failed to save the bundle. Please try again.");
