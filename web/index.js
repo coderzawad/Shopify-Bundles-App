@@ -128,9 +128,9 @@ app.post("/api/save-bundle", async (req, res) => {
     // Save the metafield to associate products with the bundle
     await metafield.save();
 
-    res
-      .status(200)
-      .json({ message: "Bundle created successfully", product: newProduct });
+    // Redirect to the product edit page after successful bundle creation
+    const editUrl = `https://admin.shopify.com/store/${session.shop}/products/${newProduct.id}`;
+    res.status(200).json({ message: "Bundle created successfully", editUrl });
   } catch (e) {
     console.log("Error creating bundle:", e);
     res
@@ -138,6 +138,7 @@ app.post("/api/save-bundle", async (req, res) => {
       .json({ message: "Failed to create bundle", error: e.message });
   }
 });
+
 
 app.get("/api/get-bundles", async (req, res) => {
   try {

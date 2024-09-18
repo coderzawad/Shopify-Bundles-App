@@ -11,9 +11,12 @@ import {
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
 import { useAuthenticatedFetch, useNavigate } from "@shopify/app-bridge-react";
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams } from "react-router-dom";
 
 export default function BundlePage() {
+  
+
+  //Settiong all the use states
   const fetch = useAuthenticatedFetch();
   const [title, setTitle] = useState("");
   const [selectedProductsCount, setSelectedProductsCount] = useState(0);
@@ -34,7 +37,7 @@ export default function BundlePage() {
         const price = parseFloat(product.price);
         return sum + (isNaN(price) ? 0 : price);
       }, 0);
-  
+
       try {
         const response = await fetch("/api/save-bundle", {
           method: "POST",
@@ -47,22 +50,22 @@ export default function BundlePage() {
             selectedProducts,
           }),
         });
-  
+
         if (response.ok) {
           const data = await response.json();
-  
+
           // Log the full response data for debugging
           console.log("API Response:", data);
-  
+
           const productId = data?.product?.id; // Safely access the product ID
-  
+
           if (productId) {
             // Get the host from the URL params
             const host = searchParams.get("host");
-  
+
             // Construct the Shopify admin URL for the new bundle
             const adminUrl = `https://${atob(host)}/admin/products/${productId}`;
-  
+
             // Redirect to the Shopify product edit page
             window.location.href = adminUrl;
           } else {
@@ -79,7 +82,6 @@ export default function BundlePage() {
       alert("Please fill out all fields and select products.");
     }
   };
-  
 
   return (
     <Page title="Bundles">

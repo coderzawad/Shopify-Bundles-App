@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://root-canadian-cube-february.trycloudflare.com"
+application_url = "https://plant-com-apache-actors.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://root-canadian-cube-february.trycloudflare.com/auth/callback",
-  "https://root-canadian-cube-february.trycloudflare.com/auth/shopify/callback",
-  "https://root-canadian-cube-february.trycloudflare.com/api/auth/callback"
+  "https://plant-com-apache-actors.trycloudflare.com/auth/callback",
+  "https://plant-com-apache-actors.trycloudflare.com/auth/shopify/callback",
+  "https://plant-com-apache-actors.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
