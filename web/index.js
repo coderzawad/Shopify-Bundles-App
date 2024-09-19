@@ -132,7 +132,7 @@ app.post("/api/save-bundle", async (req, res) => {
 
     if (matchedProduct) {
       const productId = matchedProduct.id;
-      const shopSubdomain = session.shop.split(".")[0]; // Extract the subdomain (e.g., "archbtw")
+      const shopSubdomain = session.shop.split(".")[0]; // Split {shopname}.myshopify.com to {shopname}
       const productEditUrl = `https://admin.shopify.com/store/${shopSubdomain}/products/${productId}`;      
       return res.status(200).json({ message: "Bundle created successfully", productId, productEditUrl });
     } else {
@@ -151,10 +151,9 @@ app.get("/api/get-bundles", async (req, res) => {
   try {
     const session = res.locals.shopify.session;
 
-    // Fetch the bundles (assuming you save them as products with a 'bundle' tag)
     const bundles = await shopify.api.rest.Product.all({
       session,
-      params: { tagged_with: "bundle" }, // Fetch products with a 'bundle' tag
+      params: { tagged_with: "bundle" }, // Fetch products that has the bundle tagg
     });
 
     res.status(200).json({ bundles });
@@ -164,6 +163,7 @@ app.get("/api/get-bundles", async (req, res) => {
   }
 });
 
+// Savibg tge feedback into feedback.db database
 app.post('/api/feedback', async (req, res) => {
   const { type } = req.body;
 

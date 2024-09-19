@@ -52,10 +52,10 @@ export default function BundlePage() {
           const data = await response.json();
           console.log("API Response:", data);
 
-          const productEditUrl = data?.productEditUrl; // Get the URL directly from the backend
+          const productEditUrl = data?.productEditUrl; // Get the URL directly from the backend response body : > (Have fun understanding my codes : ) )
 
           if (productEditUrl) {
-            // Redirect to the Shopify product edit page
+            // Redirect to the created bundle edit page
             window.open(productEditUrl);
           } else {
             alert("Bundle created but failed to retrieve the product URL.");
