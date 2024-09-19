@@ -7,6 +7,7 @@ import {
   Stack,
   TextStyle,
   Badge,
+  Banner,
 } from "@shopify/polaris";
 import { useState } from "react";
 import ProductSelectButton from "../components/app-components/SelectButton";
@@ -18,6 +19,7 @@ export default function BundlePage() {
   const [title, setTitle] = useState("");
   const [selectedProductsCount, setSelectedProductsCount] = useState(0);
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [bundleCreatedMessage, setBundleCreatedMessage] = useState(""); // State for success message
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
@@ -52,7 +54,7 @@ export default function BundlePage() {
           const data = await response.json();
           console.log("API Response:", data);
 
-          const productEditUrl = data?.productEditUrl; // Get the URL directly from the backend response body : > (Have fun understanding my codes : ) )
+          const productEditUrl = data?.productEditUrl;
 
           if (productEditUrl) {
             // Redirect to the created bundle edit page
@@ -60,6 +62,9 @@ export default function BundlePage() {
           } else {
             alert("Bundle created but failed to retrieve the product URL.");
           }
+
+          // Display success message
+          setBundleCreatedMessage("Bundle created successfully!");
         } else {
           alert("Failed to save the bundle. Please try again.");
         }
@@ -116,6 +121,11 @@ export default function BundlePage() {
                   Save and continue
                 </Button>
               </div>
+              {bundleCreatedMessage && (
+                <div style={{ marginTop: "10px" }}>
+                  <Banner status="success">{bundleCreatedMessage}</Banner>
+                </div>
+              )}
             </Card.Section>
           </Card>
         </Layout.Section>

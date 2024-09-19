@@ -8,12 +8,15 @@ import {
   Card,
   ButtonGroup,
   Toast,
-  Frame
+  Frame,
+  Icon,
+  Banner
 } from "@shopify/polaris";
-
+import { ThumbsUpMajor, ThumbsDownMajor } from "@shopify/polaris-icons";
 import { useNavigate, Link } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 import { useAuthenticatedFetch } from "@shopify/app-bridge-react";
+import { CirclePlusMinor, ViewMinor } from '@shopify/polaris-icons';
 
 // Merge Sort Function
 const mergeSort = (array, key) => {
@@ -45,7 +48,7 @@ const merge = (left, right, key) => {
   }
 
   return result.concat(left.slice(leftIndex)).concat(right.slice(rightIndex));
-};
+}; // Using the merge sort cause javascript perfomance is dog shit...
 
 function BundlePage() {
   const [bundles, setBundles] = useState([]);
@@ -54,7 +57,6 @@ function BundlePage() {
   const [showToast, setShowToast] = useState(false);  // State for toast visibility
   const [toastMessage, setToastMessage] = useState("")
   
-  // Fetch products from the backend
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -69,9 +71,9 @@ function BundlePage() {
       } catch (error) {
         console.error("Error fetching products:", error);
       }
-    };
+    }; // Fetch products and filters the object that is returned from the backend body (Will implement a better way later)
     fetchProducts();
-  }, [fetch]);
+  }, [fetch]); 
 
   // Sort bundles by price (higher to lower)
   const sortedBundles = mergeSort(bundles, 'price');
@@ -118,23 +120,30 @@ function BundlePage() {
     <Page title="Bundles" divider>
       {/* Buttons for Actions */}
       <div
-        style={{
-          display: "flex",
-          justifyContent: "flex-end",
-          margin: "16px 0",
-        }}
+  style={{
+    display: "flex",
+    justifyContent: "flex-end",
+    margin: "16px 0",
+  }}
+>
+  <ButtonGroup>
+    <Button
+    plain
+      icon={ViewMinor}
+      onClick={handleViewInProductList}
+    >
+      View in product list
+    </Button>
+    <Link to="/app-new-bundle" style={{ textDecoration: "none" }}>
+      <Button
+        primary
+        icon={CirclePlusMinor}
       >
-        <ButtonGroup>
-          <Button plain onClick={handleViewInProductList} size="medium">
-            View in product list
-          </Button>
-          <Link to="/app-new-bundle" style={{ color: "white", textDecoration: "none" }}>
-            <Button primary size="medium">
-              Create bundle
-            </Button>
-          </Link>
-        </ButtonGroup>
-      </div>
+        Create bundle
+      </Button>
+    </Link>
+  </ButtonGroup>
+</div>
 
       {/* Display Bundles */}
       <Card title="Bundle Products" sectioned>
@@ -165,28 +174,45 @@ function BundlePage() {
             }}
           />
         ) : (
-          <TextStyle variation="subdued">Nothing to show</TextStyle>
+          <Banner status="info" title="Nothing to show" />
         )}
       </Card>
 
       {/* Feedback Section */}
       <Card title="Share your feedback" sectioned>
-        <p>How would you describe your experience using the Shopify Bundles app?</p>
-        <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
-          <Button icon={<span role="img" aria-label="thumbs up">👍</span>} plain onClick={() => submitFeedback("good")}>
-            Good
-          </Button>
-          <Button icon={<span role="img" aria-label="thumbs down">👎</span>} plain onClick={() => submitFeedback("bad")}>
-            Bad
-          </Button>
-        </div>
-      </Card>
+  <p>How would you describe your experience using the Shopify Bundles app?</p>
+  <div style={{ display: "flex", justifyContent: "space-between", marginTop: "12px" }}>
+    <Button
+      icon={ThumbsUpMajor} // Use the Polaris icon for thumbs up
+      plain
+      className="Polaris-Button Polaris-Button--pressable Polaris-Button--sizeMedium Polaris-Button--textAlignCenter"
+      onClick={() => submitFeedback("good")}
+    >
+      Good
+    </Button>
+    <Button
+      icon={ThumbsDownMajor} // Use the Polaris icon for thumbs down
+      plain
+      className="Polaris-Button Polaris-Button--pressable Polaris-Button--sizeMedium Polaris-Button--textAlignCenter"
+      onClick={() => submitFeedback("bad")}
+    >
+      Bad
+    </Button>
+  </div>
+</Card>
 
       <div style={{ textAlign: "center", marginTop: "20px" }}>
         <a href="https://help.shopify.com/manual/products/bundles" style={{ textDecoration: "none", color: "#5c6ac4" }}>
           Learn more about creating bundles
         </a>
       </div>
+
+      {/* Toast for feedback */}
+      {showToast && (
+        <Frame>
+          <Toast content={toastMessage} onDismiss={() => setShowToast(false)} />
+        </Frame>
+      )}
     </Page>
   );
 }
