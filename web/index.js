@@ -82,37 +82,30 @@ app.get("/api/products/create", async (_req, res) => {
 app.post("/api/save-bundle", async (req, res) => {
   const { title, price, selectedProducts } = req.body;
 
-  if (
-    !title ||
-    !Array.isArray(selectedProducts) ||
-    selectedProducts.length === 0
-  ) {
+  if (!title || !Array.isArray(selectedProducts) || selectedProducts.length === 0) {
     return res.status(400).json({ message: "Invalid data" });
   }
 
   try {
-    const session = res.locals.shopify.session; // Get the Shopify session
+    const session = res.locals.shopify.session;
 
-    // Create the new product (which will act as the bundle)
+
     const newProduct = new shopify.api.rest.Product({ session });
     newProduct.title = title;
     newProduct.body_html = `This bundle contains ${selectedProducts.length} products.`;
     newProduct.variants = [
       {
         price: price,
-        inventory_quantity: 100, // Set a high quantity, or manage through individual items
+        inventory_quantity: 100,
       },
     ];
-
-    // Optionally add a tag like 'bundle' to identify it as a bundle
     newProduct.tags = "bundle";
     newProduct.vendor = "Bundle Builder";
     newProduct.product_type = "bundle";
 
-    // Save the bundle product to Shopify
     await newProduct.save();
 
-    // Attach the selected products using metafields
+
     const productIds = selectedProducts.map((product) => product.id);
     const metafield = new shopify.api.rest.Metafield({ session });
     metafield.namespace = "bundle";
@@ -124,20 +117,34 @@ app.post("/api/save-bundle", async (req, res) => {
     metafield.type = "json_string";
     metafield.owner_id = newProduct.id;
     metafield.owner_resource = "product";
-
-    // Save the metafield to associate products with the bundle
     await metafield.save();
 
-    // Redirect to the product edit page after successful bundle creation
-    const editUrl = `https://admin.shopify.com/store/${session.shop}/products/${newProduct.id}`;
-    res.status(200).json({ message: "Bundle created successfully", editUrl });
+
+    const productResponse = await shopify.api.rest.Product.all({ session });
+
+
+    let productsArray = productResponse.data || productResponse; 
+
+
+    const matchedProduct = Array.isArray(productsArray)
+      ? productsArray.find((product) => product.title === newProduct.title)
+      : null;
+
+    if (matchedProduct) {
+      const productId = matchedProduct.id;
+      const shopSubdomain = session.shop.split(".")[0]; // Extract the subdomain (e.g., "archbtw")
+      const productEditUrl = `https://admin.shopify.com/store/${shopSubdomain}/products/${productId}`;      
+      return res.status(200).json({ message: "Bundle created successfully", productId, productEditUrl });
+    } else {
+      return res.status(404).json({ message: "Created product not found" });
+    }
+
   } catch (e) {
     console.log("Error creating bundle:", e);
-    res
-      .status(500)
-      .json({ message: "Failed to create bundle", error: e.message });
+    res.status(500).json({ message: "Failed to create bundle", error: e.message });
   }
 });
+
 
 
 app.get("/api/get-bundles", async (req, res) => {

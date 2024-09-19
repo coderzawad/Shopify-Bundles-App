@@ -14,9 +14,6 @@ import { useAuthenticatedFetch, useNavigate } from "@shopify/app-bridge-react";
 import { useSearchParams } from "react-router-dom";
 
 export default function BundlePage() {
-  
-
-  //Settiong all the use states
   const fetch = useAuthenticatedFetch();
   const [title, setTitle] = useState("");
   const [selectedProductsCount, setSelectedProductsCount] = useState(0);
@@ -53,23 +50,15 @@ export default function BundlePage() {
 
         if (response.ok) {
           const data = await response.json();
-
-          // Log the full response data for debugging
           console.log("API Response:", data);
 
-          const productId = data?.product?.id; // Safely access the product ID
+          const productEditUrl = data?.productEditUrl; // Get the URL directly from the backend
 
-          if (productId) {
-            // Get the host from the URL params
-            const host = searchParams.get("host");
-
-            // Construct the Shopify admin URL for the new bundle
-            const adminUrl = `https://${atob(host)}/admin/products/${productId}`;
-
+          if (productEditUrl) {
             // Redirect to the Shopify product edit page
-            window.location.href = adminUrl;
+            window.open(productEditUrl);
           } else {
-            alert("Bundle created but failed to retrieve product ID.");
+            alert("Bundle created but failed to retrieve the product URL.");
           }
         } else {
           alert("Failed to save the bundle. Please try again.");
