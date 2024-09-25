@@ -10,9 +10,6 @@ import shopify from "./shopify.js";
 import productCreator from "./product-creator.js";
 import GDPRWebhookHandlers from "./gdpr.js";
 
-const SHOPIFY_DOMAIN = "archbtw.myshopify.com";
-const ACCESS_TOKEN = "757047dda64718c8cd95afbb322d36ab";
-
 const PORT = parseInt(
   process.env.BACKEND_PORT || process.env.PORT || "3000",
   10
@@ -105,7 +102,7 @@ app.post("/api/save-bundle", async (req, res) => {
 
     await newProduct.save();
 
-
+  // I am just figuring out how it works (Doesnt works for now)
     const productIds = selectedProducts.map((product) => product.id);
     const metafield = new shopify.api.rest.Metafield({ session });
     metafield.namespace = "bundle";

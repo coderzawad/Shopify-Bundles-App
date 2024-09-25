@@ -3,7 +3,7 @@
 client_id = "2b8c014c61b5cd9be05086a0f479018e"
 name = "bundles-app"
 handle = "bundles-app-48"
-application_url = "https://candidates-cj-solved-exercise.trycloudflare.com"
+application_url = "https://extensions-ballot-harmful-arthur.trycloudflare.com"
 embedded = true
 
 [build]
@@ -17,9 +17,9 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://candidates-cj-solved-exercise.trycloudflare.com/auth/callback",
-  "https://candidates-cj-solved-exercise.trycloudflare.com/auth/shopify/callback",
-  "https://candidates-cj-solved-exercise.trycloudflare.com/api/auth/callback"
+  "https://extensions-ballot-harmful-arthur.trycloudflare.com/auth/callback",
+  "https://extensions-ballot-harmful-arthur.trycloudflare.com/auth/shopify/callback",
+  "https://extensions-ballot-harmful-arthur.trycloudflare.com/api/auth/callback"
 ]
 
 [webhooks]
