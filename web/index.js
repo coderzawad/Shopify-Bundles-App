@@ -1,4 +1,3 @@
-// @ts-check
 import { join } from "path";
 import { readFileSync } from "fs";
 import express from "express";
@@ -19,7 +18,7 @@ const openDb = async () => {
   return open({
     filename: '../web/frontend/database/feedback.db',
     driver: sqlite3.Database
-  });
+  }); 
 };
 
 const STATIC_PATH =
@@ -73,6 +72,7 @@ app.get("/api/products/create", async (_req, res) => {
     status = 500;
     error = e.message;
   }
+  
   res.status(status).send({ success: status === 200, error });
 });
 
@@ -85,65 +85,135 @@ app.post("/api/save-bundle", async (req, res) => {
 
   try {
     const session = res.locals.shopify.session;
+    const client = new shopify.clients.Graphql({session});
 
+    // Fetch full details for each product
+    const productDetailsQuery = `
+      query getProductDetails($ids: [ID!]!) {
+        nodes(ids: $ids) {
+          ... on Product {
+            id
+            title
+            options {
+              id
+              name
+              values
+            }
+            variants(first: 1) {
+              edges {
+                node {
+                  id
+                }
+              }
+            }
+          }
+        }
+      }
+    `;
 
-    const newProduct = new shopify.api.rest.Product({ session });
-    newProduct.title = title;
-    newProduct.body_html = `This bundle contains ${selectedProducts.length} products.`;
-    newProduct.variants = [
-      {
-        price: price,
-        inventory_quantity: 100,
-      },
-    ];
-    newProduct.tags = "bundle";
-    newProduct.vendor = "Bundle Builder";
-    newProduct.product_type = "bundle";
-
-    await newProduct.save();
-
-  // I am just figuring out how it works (Doesnt works for now)
-    const productIds = selectedProducts.map((product) => product.id);
-    const metafield = new shopify.api.rest.Metafield({ session });
-    metafield.namespace = "bundle";
-    metafield.key = "bundled_products";
-    metafield.value = JSON.stringify({
-      product_ids: productIds,
-      item_count: selectedProducts.length,
+    const productIds = selectedProducts.map(p => `gid://shopify/Product/${p.id}`);
+    const productDetailsResponse = await client.query({
+      data: {
+        query: productDetailsQuery,
+        variables: { ids: productIds }
+      }
     });
-    metafield.type = "json_string";
-    metafield.owner_id = newProduct.id;
-    metafield.owner_resource = "product";
-    await metafield.save();
 
+    const fullProductDetails = productDetailsResponse.body.data.nodes;
 
-    const productResponse = await shopify.api.rest.Product.all({ session });
+    // Construct the components array for the GraphQL mutation
+    const components = fullProductDetails.map(product => ({
+      quantity: 1,
+      productId: product.id,
+      optionSelections: product.options.map(option => ({
+        componentOptionId: option.id,
+        name: option.name,
+        values: [option.values[0]] // Selecting the first option value
+      }))
+    }));
 
+    // Construct the GraphQL mutation
+    const mutation = `
+      mutation productBundleCreate($input: ProductBundleCreateInput!) {
+        productBundleCreate(input: $input) {
+          productBundleOperation {
+            id
+            status
+          }
+          userErrors {
+            message
+            field
+          }
+        }
+      }
+    `;
 
-    let productsArray = productResponse.data || productResponse; 
+    const response = await client.query({
+      data: {
+        query: mutation,
+        variables: {
+          input: {
+            title: title,
+            components: components
+          }
+        }
+      }
+    });
 
+    const result = response.body.data.productBundleCreate;
 
-    const matchedProduct = Array.isArray(productsArray)
-      ? productsArray.find((product) => product.title === newProduct.title)
-      : null;
-
-    if (matchedProduct) {
-      const productId = matchedProduct.id;
-      const shopSubdomain = session.shop.split(".")[0]; // Split {shopname}.myshopify.com to {shopname}
-      const productEditUrl = `https://admin.shopify.com/store/${shopSubdomain}/products/${productId}`;      
-      return res.status(200).json({ message: "Bundle created successfully", productId, productEditUrl });
-    } else {
-      return res.status(404).json({ message: "Created product not found" });
+    if (result.userErrors.length > 0) {
+      throw new Error(result.userErrors[0].message);
     }
+
+    const operationId = result.productBundleOperation.id;
+
+     const pollForStatus = async () => {
+      const statusQuery = `
+        query {
+          productBundleOperation(id: "${operationId}") {
+            status
+            productId
+          }
+        }
+      `;
+
+      const statusResponse = await client.query({
+        data: { query: statusQuery }
+      });
+
+      const operation = statusResponse.body.data.productBundleOperation;
+
+      if (operation.status === 'COMPLETED') {
+        const productId = operation.productId.split('/').pop();
+        const shopSubdomain = session.shop.split(".")[0];
+        const productEditUrl = `https://admin.shopify.com/store/${shopSubdomain}/products/${productId}`;
+
+        await shopify.api.rest.Product.update(session, {
+          id: productId,
+          variants: [{ price: price }]
+        });
+
+        res.status(200).json({
+          message: "Bundle created successfully",
+          productId: productId,
+          productEditUrl: productEditUrl
+        });
+      } else if (operation.status === 'FAILED') {
+        throw new Error('Bundle creation failed');
+      } else {
+        setTimeout(pollForStatus, 1000);
+      }
+    };
+
+    // Start polling for status
+    pollForStatus();
 
   } catch (e) {
     console.log("Error creating bundle:", e);
     res.status(500).json({ message: "Failed to create bundle", error: e.message });
   }
 });
-
-
-
 app.get("/api/get-bundles", async (req, res) => {
   try {
     const session = res.locals.shopify.session;
